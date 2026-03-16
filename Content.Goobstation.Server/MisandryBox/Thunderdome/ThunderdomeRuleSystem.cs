@@ -18,14 +18,13 @@ using Content.Shared.Fluids.Components;
 using Content.Shared.Item;
 using Content.Server.Preferences.Managers;
 using Content.Shared.Damage;
+using Content.Shared.Dataset;
 using Content.Shared.Examine;
-using Content.Shared.Humanoid;
 using Content.Shared.IdentityManagement;
 using Content.Shared.Interaction.Events;
 using Content.Shared.Mind;
 using Content.Shared.Mobs;
 using Content.Shared.Mobs.Components;
-using Content.Shared.Mind.Components;
 using Content.Shared.Popups;
 using Content.Shared.Preferences;
 using Content.Shared.Weapons.Ranged.Components;
@@ -38,6 +37,7 @@ using Robust.Shared.Enums;
 using Robust.Shared.Player;
 using Robust.Shared.Random;
 using Robust.Shared.Containers;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Spawners;
 using Robust.Shared.Timing;
 
@@ -62,8 +62,10 @@ public sealed class ThunderdomeRuleSystem : EntitySystem
     [Dependency] private readonly TemporaryMindSystem _tempMind = default!;
     [Dependency] private readonly ILocalizationManager _loc = default!;
     [Dependency] private readonly GunSystem _gun = default!;
+    [Dependency] private readonly IPrototypeManager _prototype = default!; // Orion
 
     private const string RulePrototype = "ThunderdomeRule";
+    private static readonly ProtoId<LocalizedDatasetPrototype> ThunderdomeNameSuffixDataset = "NamesOperationPrefix"; // Orion
     private EntityUid? _ruleEntity;
     private bool _refillOnKill;
 
@@ -248,7 +250,17 @@ public sealed class ThunderdomeRuleSystem : EntitySystem
 
         HumanoidCharacterProfile? profile = null;
         if (mindComp.UserId is { } userId && _prefs.TryGetCachedPreferences(userId, out var prefs))
-            profile = (prefs.SelectedCharacter as HumanoidCharacterProfile)?.WithSpecies(SharedHumanoidAppearanceSystem.DefaultSpecies);
+        // Orion-Edit-Start
+        {
+            if (prefs.SelectedCharacter is HumanoidCharacterProfile selectedProfile)
+            {
+                var dataset = _prototype.Index(ThunderdomeNameSuffixDataset);
+                var suffix = _loc.GetString(_random.Pick(dataset.Values));
+                var thunderdomeName = $"{suffix} {selectedProfile.Name}";
+                profile = selectedProfile.WithName(thunderdomeName);
+            }
+        }
+        // Orion-Edit-End
 
         var originalBody = mindComp.OwnedEntity != ghostEntity ? mindComp.OwnedEntity : null;
 

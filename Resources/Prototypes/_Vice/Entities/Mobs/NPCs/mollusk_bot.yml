@@ -1,0 +1,30 @@
+- type: entity
+  parent: BaseMobFlesh
+  id: MobMolluskBot
+  name: Каркот Радам
+  description: Древний конструкт, что был отправлен защищать первых колонистов, выглядит искажённым каким-то существом.
+  components:
+  - type: Sprite
+    drawdepth: Mobs
+    sprite: _Vice/Mobs/Aliens/mollusk_bot.rsi
+    layers:
+      - state: icon
+        map: ["enum.DamageStateVisualLayers.Base"]
+  - type: MovementSpeedModifier
+    baseWalkSpeed: 0.5
+    baseSprintSpeed: 0.8
+  - type: MeleeWeapon
+    soundHit:
+      path: /Audio/Weapons/Xeno/alien_claw_flesh3.ogg #/Audio/_Vice/Ambience/Objects/robot_hum.ogg
+    angle: 0
+    animation: WeaponArcClaw
+    damage:
+        types:
+          Slash: 25
+          Structural: 20
+    attackRate: 1.2
+    range: 1.8
+  - type: MobThresholds
+    thresholds:
+      0: Alive
+      600: Dead
